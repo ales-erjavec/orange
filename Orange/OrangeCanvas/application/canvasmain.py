@@ -6,6 +6,7 @@ import os
 import sys
 import logging
 import operator
+import textwrap
 from functools import partial
 from StringIO import StringIO
 
@@ -61,6 +62,7 @@ from ..preview import previewdialog, previewmodel
 from .. import config
 
 from . import tutorials
+from . import packageinstaller
 
 log = logging.getLogger(__name__)
 
@@ -977,6 +979,41 @@ class CanvasMainWindow(QMainWindow):
         from a saved `filename`. Return `None` if an error occurs.
 
         """
+        # Parse the scheme for unsatisfied requirements before
+        # loading it.
+        contents = open(filename, "rb").read()
+        requires = packageinstaller.scheme_requires(contents)
+        requires = [req for req in requires
+                    if not packageinstaller.is_req_satisfied(req)]
+        if requires:
+            status = message_question(
+                title="Install Additional Packages?",
+                text=textwrap.dedent("""\
+                    This scheme requires additional packages.
+                    Would you like to install them now?"""),
+                informative_text=
+                    "After installation you will have to restart the application.",
+                details="\n".join(["Required packages:"] +
+                                  ["\t" + r.name for r in requires]),
+                buttons=QMessageBox.Ok | QMessageBox.Abort,
+                default_button=QMessageBox.Ok,
+                parent=self
+            )
+
+            if status != QMessageBox.Ok:
+                return None
+
+            status = self.install_requirements(requires)
+            if status == QDialog.Rejected:
+                return None
+            else:
+                message_information(
+                    title="Please Restart",
+                    text="Please restart the application and reopen the file.",
+                    parent=self
+                )
+                return None
+
         new_scheme = widgetsscheme.WidgetsScheme(parent=self)
         errors = []
         try:
@@ -1970,6 +2007,16 @@ class CanvasMainWindow(QMainWindow):
             visible_state[cat.name] = visible
         self.__proxy_model.setFilterFunc(
             category_filter_function(visible_state))
+
+    def install_requirements(self, requires):
+        dlg = packageinstaller.InstallPackagesDialog(self, )
+        dlg.setWindowTitle("Install add-ons")
+        dlg.setText(
+            "The following packages are required in order "
+            "to open the scheme.")
+
+        dlg.setPackages(requires)
+        return dlg.exec_()
 
 
 def updated_flags(flags, mask, state):
