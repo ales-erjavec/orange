@@ -48,7 +48,6 @@ from .aboutdialog import AboutDialog
 from .schemeinfo import SchemeInfoDialog
 from .outputview import OutputView
 from .settings import UserSettingsDialog, category_state
-from .addons import AddOnManagerDialog
 
 from ..document.schemeedit import SchemeEditWidget
 from ..document.quickmenu import SortFilterProxyModel
@@ -326,12 +325,6 @@ class CanvasMainWindow(QMainWindow):
                        tool_actions + \
                        [self.freeze_action,
                         self.dock_help_action]
-
-
-        def addOnRefreshCallback():
-            pass #TODO add new category
-
-        Orange.utils.addons.addon_refresh_callback.append(addOnRefreshCallback)
 
         # Tool bar in the collapsed dock state (has the same actions as
         # the tool bar in the CanvasToolDock
@@ -1578,27 +1571,12 @@ class CanvasMainWindow(QMainWindow):
             self.__update_from_settings()
 
     def open_addons(self):
-
-        def getlr():
-            settings = QSettings()
-            settings.beginGroup("addons")
-            lastRefresh = settings.value("addons-last-refresh",
-                          defaultValue=0, type=int)
-            settings.endGroup()
-            return lastRefresh
-        
-        def setlr(v):
-            settings = QSettings()
-            settings.beginGroup("addons")
-            lastRefresh = settings.setValue("addons-last-refresh", int(v))
-            settings.endGroup()
-            
-        dlg = AddOnManagerDialog(self, self)
-        dlg.loadtimefn = getlr
-        dlg.savetimefn = setlr
-        dlg.show()
-        dlg.reloadQ()
-        status = dlg.exec_()
+        from .addons import AddonManagerDialog
+        dlg = AddonManagerDialog(
+            parent=self,
+            windowTitle=self.tr("Add-ons")
+        )
+        return dlg.exec_()
 
     def show_output_view(self):
         """Show a window with application output.

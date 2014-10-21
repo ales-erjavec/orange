@@ -262,6 +262,11 @@ def widgets_entry_points():
     return itertools.chain(*chain)
 
 
+ADDON_PYPI_SEARCH_SPEC = {"keywords": "orange add-on"}
+
+ADDON_ENTRY = "orange.addons"
+
+
 def splash_screen():
     """
     """
