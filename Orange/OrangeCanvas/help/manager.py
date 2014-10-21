@@ -222,11 +222,13 @@ def get_dist_url(dist):
 
 def get_dist_meta(dist):
     if dist.has_metadata("PKG-INFO"):
-        # egg-info
-        contents = dist.get_metadata("PKG-INFO")
+        # egg-info/PKG-INFO
+        return parse_meta(dist.get_metadata("PKG-INFO"))
     elif dist.has_metadata("METADATA"):
-        contents = dist.get_metadata("METADATA")
-    return parse_meta(contents)
+        # dist-info/METADATA
+        return parse_meta(dist.get_metadata("METADATA"))
+    else:
+        return {}
 
 
 def create_intersphinx_provider(entry_point):
