@@ -78,14 +78,13 @@ BUNDLE_LITE=$SCRIPT_DIR_NAME/bundle-lite/Orange.app
 
 # Versions of included 3rd party software
 
-PYTHON_VER=2.7.6
-PIP_VER=1.5.5
-SETUPTOOLS_VER=3.4.4
-NUMPY_VER=1.8.1
-SCIPY_VER=0.13.3
-QT_VER=4.8.6
-SIP_VER=4.14.6
-PYQT_VER=4.10.1
+PYTHON_VER=2.7.10
+PIP_VER=6.1.1
+NUMPY_VER=1.9.2
+SCIPY_VER=0.15.1
+QT_VER=4.8.7
+SIP_VER=4.16.2
+PYQT_VER=4.11.1
 PYQWT_VER=5.2.0
 
 # Number of make jobs
@@ -150,7 +149,7 @@ EOF
 }
 
 function install_python() {
-	download_and_extract "http://www.python.org/ftp/python/$PYTHON_VER/Python-$PYTHON_VER.tgz"
+	download_and_extract "https://www.python.org/ftp/python/$PYTHON_VER/Python-$PYTHON_VER.tgz"
 
 	pushd Python-$PYTHON_VER
 
@@ -166,13 +165,14 @@ EOF
 	./configure --enable-framework="$APP"/Contents/Frameworks \
 				--prefix="$APP"/Contents/Resources \
 				--with-universal-archs=intel \
+				--enable-ipv6 \
 				--enable-universalsdk="$SDK"
 
 	make -j $MAKE_JOBS
 
 	# We don't want to install IDLE.app, Python Launcher.app, in /Applications
 	# on the build system.
-	make install PYTHONAPPSDIR=$(pwd)
+	make install PYTHONAPPSDIR="$(pwd)"
 
 	popd
 
@@ -195,40 +195,19 @@ EOF
 
 	chmod +x "$APP"/Contents/MacOS/python
 
+	# Test it
 	"$PYTHON" -c"import sys, hashlib"
 
-}
+	# Install pip/setuptools
+	"$PYTHON" -m ensurepip
+	"$PYTHON" -m pip install pip==$PIP_VER
 
-function install_pip() {
-	download_and_extract "https://pypi.python.org/packages/source/p/pip/pip-$PIP_VER.tar.gz"
-
-	pushd pip-$PIP_VER
-
-	"$PYTHON" setup.py install
 	create_shell_start_script pip
-
-	"$PIP" --version
-
-	popd
-}
-
-function install_setuptools() {
-	download_and_extract "https://pypi.python.org/packages/source/s/setuptools/setuptools-$SETUPTOOLS_VER.tar.gz"
-
-	pushd setuptools-$SETUPTOOLS_VER
-
-	"$PYTHON" setup.py install
 	create_shell_start_script easy_install
-
-	"$EASY_INSTALL" --version
-
-	popd
 }
-
 
 function install_ipython {
-	# install with easy_install (does not work with pip)
-	"$EASY_INSTALL" ipython
+	"$PIP" install ipython
 	create_shell_start_script ipython
 }
 
@@ -245,7 +224,7 @@ function install_qt4 {
 		ARCHIVE="http://download.qt-project.org/archive/qt/$QT_VER_SHORT/$QT_VER/qt-everywhere-opensource-src-$QT_VER.tar.gz"
 	fi
 
-	if curl --fail --head --silent -o /dev/null $OFFICIAL ; then
+	if curl -L --max-redirs 3 --fail --head --silent -o /dev/null $OFFICIAL ; then
 		QT_URL=$OFFICIAL
 	else
 		QT_URL=$ARCHIVE
@@ -268,10 +247,12 @@ function install_qt4 {
 				-no-sql-odbc \
 				-no-sql-sqlite \
 				-no-sql-sqlite2 \
+				-no-phonon \
 				-nomake examples \
 				-nomake demos \
 				-nomake docs \
 				-nomake translations \
+				-nomake tools \
 				-sdk "$SDK"
 
 	make -j $MAKE_JOBS
@@ -423,7 +404,7 @@ function make_standalone {
 	yes y | "$PIP" uninstall macholib
 }
 
-pushd $BUILD_TEMP
+pushd "$BUILD_TEMP"
 
 echo "Building template in $BUILD_TEMP"
 echo
@@ -431,10 +412,6 @@ echo
 create_template
 
 install_python
-
-install_setuptools
-
-install_pip
 
 install_numpy
 
