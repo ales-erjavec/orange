@@ -164,8 +164,8 @@ echo "=================="
 
 # Install as eggs. The application's Add-ons dialog has problem with
 # upgrading flat installs.
-"$PIP" install --egg hg+https://bitbucket.org/biolab/orange-bioinformatics
-"$PIP" install --egg hg+https://bitbucket.org/biolab/orange-text
+"$PIP" install --egg Orange-Bioinformatics
+"$PIP" install --egg Orange-Text
 "$PIP" install --egg Orange-Network
 
 echo "Installing optional dependencies"
