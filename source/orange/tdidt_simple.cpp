@@ -625,6 +625,9 @@ TSimpleTreeLearner::operator()(PExampleGenerator ogen, const int &weight)
 	if (!ogen->numberOfExamples() > 0)
 	    raiseError("no examples");
 
+	if (weight != 0)
+		raiseWarning("SimpleTreeLearner does not support instance weights.");
+
 	/* create a tabel with pointers to examples */
 	ASSERT(examples = (struct Example *)calloc(ogen->numberOfExamples(), sizeof *examples));
 	ex = examples;

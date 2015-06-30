@@ -175,6 +175,11 @@ class SVMLearner(_SVMLearner):
         :param weight: ignored (required due to base class signature);
         """
 
+        if weight:
+            warnings.warn(
+                "SVMLearner does not support instance weights",
+                UserWarning, stacklevel=2)
+
         examples = Orange.core.Preprocessor_dropMissingClasses(data)
         class_var = examples.domain.class_var
         if len(examples) == 0:
@@ -887,6 +892,11 @@ class LinearSVMLearner(Orange.core.LinearLearner):
             )
 
     def __call__(self, data, weight_id=None):
+        if weight_id:
+            warnings.warn(
+                "LinearSVMLearner does not support instance weights",
+                UserWarning, stacklevel=2)
+
         if not isinstance(data.domain.class_var, variable.Discrete):
             raise TypeError("Can only learn a discrete class.")
 
@@ -951,6 +961,11 @@ class MultiClassSVMLearner(Orange.core.LinearLearner):
         self.solver_type = self.MCSVM_CS
 
     def __call__(self, data, weight_id=None):
+        if weight_id:
+            warnings.warn(
+                "MultiClassSVMLearner does no support instance weights",
+                UserWarning, stacklevel=2)
+
         if not isinstance(data.domain.class_var, variable.Discrete):
             raise TypeError("Can only learn a discrete class.")
 

@@ -1,3 +1,4 @@
+import warnings
 from numpy import dot, std, array, zeros, maximum, sqrt, sign, log, abs, \
                   ascontiguousarray, random as rnd
 from scipy.linalg import norm, eigh
@@ -115,6 +116,11 @@ class LassoRegressionLearner(Orange.regression.base.BaseRegressionLearner):
         :param weight: Weights for instances. Not implemented yet.
         
         """
+        if weight:
+            warnings.warn(
+                "LassoRegressionLearner does not support instance weights.",
+                UserWarning, stacklevel=2)
+
         # dicrete values are continuized        
         data = self.continuize_table(data)
         # missing values are imputed

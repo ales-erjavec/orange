@@ -1,9 +1,12 @@
+import decimal
+import math
+import warnings
+
 import Orange
 from Orange.utils import deprecated_keywords, deprecated_members
 from Orange.data import preprocess
 from Orange.data.continuization import DomainContinuizer
-import decimal
-import math
+
 
 
 from numpy import dot, array, identity, reshape, diagonal, \
@@ -1098,6 +1101,11 @@ class LibLinearLogRegLearner(Orange.core.LinearLearner):
         """
         if not isinstance(data.domain.class_var, Orange.feature.Discrete):
             raise TypeError("Can only learn a discrete class.")
+
+        if weight_id:
+            warnings.warn(
+                "LibLinearLogRegLearner does not support instance weights.",
+                UserWarning, stacklevel=2)
 
         if data.domain.has_discrete_attributes(False) or self.normalization:
             dc = DomainContinuizer()

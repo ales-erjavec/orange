@@ -17,10 +17,10 @@ Neural Network Learner  (``neural``)
     :show-inheritance:
 
 """
-
+import random
+import warnings
 
 import Orange
-import random
 import numpy as np
 import scipy.sparse
 from scipy.optimize import fmin_l_bfgs_b
@@ -184,6 +184,10 @@ class NeuralNetworkLearner(Orange.classification.Learner):
 
         :rtype: :class:`~NeuralNetworkClassifier`
         """
+        if weight:
+            warnings.warn(
+                "NeuralNetworkLearner does not support instance weights.",
+                UserWarning, stacklevel=2)
 
         #converts attribute data
         X = data.to_numpy()[0]

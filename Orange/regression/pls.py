@@ -70,6 +70,8 @@ Note that coefficients are stored in a matrix since the model predicts
 values of multiple outputs.
 """
 
+import warnings
+
 import Orange
 import numpy
 
@@ -245,7 +247,12 @@ class PLSRegressionLearner(base.BaseRegressionLearner):
             :obj:`~Orange.data.Domain.class_vars` is constructed.
         :type x_vars, y_vars: list            
 
-        """     
+        """
+        if weight_id:
+            warnings.warn(
+                "PLSRegressionLearner does not support instance weights.",
+                UserWarning, stacklevel=2)
+
         domain = table.domain
         multitarget = False
         if x_vars is None and y_vars is None:
