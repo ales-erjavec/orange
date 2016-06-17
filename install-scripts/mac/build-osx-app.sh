@@ -164,14 +164,14 @@ echo "=================="
 
 # Install as eggs. The application's Add-ons dialog has problem with
 # upgrading flat installs.
-"$PIP" install --egg hg+https://bitbucket.org/biolab/orange-bioinformatics
+"$PIP" install --egg orange-bioinformatics
+"$PIP" install --egg orange-network
 "$PIP" install --egg hg+https://bitbucket.org/biolab/orange-text
-"$PIP" install --egg Orange-Network
+
 
 echo "Installing optional dependencies"
 echo "================================"
 "$PIP" install slumber
-"$PIP" install --allow-external PIL --allow-unverified PIL PIL
 
 
 if [[ ! $INPLACE ]]; then
